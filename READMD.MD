@@ -146,4 +146,81 @@ module.exports = {
 
 你发现 `dist/bundle.js` 中的差异了吗？显然，现在整个 bundle 都已经被精简过，但是如果仔细观察，则不会看到 `square` 函数被引入，但会看到 `cube` 函数的修改版本（`function r(e){return e*e*e}n.a=r`）。现在，随着 tree shaking 和代码压缩，我们的 bundle 减小几个字节！虽然，在这个特定示例中，可能看起来没有减少很多，但是，在具有复杂的依赖树的大型应用程序上运行时，tree shaking 或许会对 bundle 产生显著的体积优化。
 
-## 结论
+## 细粒度 shimming
+
+一些传统的模块依赖的 `this` 指向的是 `window` 对象
+
+当模块运行在 CommonJS 环境下这将会变成一个问题，也就是说此时的 `this` 指向的是 `module.exports`。在这个例子中，你可以通过使用 [`imports-loader`](https://www.webpackjs.com/loaders/imports-loader/) 覆写 `this`：
+
+## **webpack.config.js**
+
+```diff
+module.exports = {
++   module: {
++     rules: [
++       {
++         test: require.resolve('index.js'),
++         use: 'imports-loader?this=>window'
++       }
++     ]
++   },
+```
+
+## 全局 exports
+
+让我们假设，某个库(library)创建出一个全局变量，它期望用户使用这个变量。为此，我们可以在项目配置中，添加一个小模块来演示说明：
+
+**project**
+
+```diff
+  webpack-demo
+  |- package.json
+  |- webpack.config.js
+  |- /dist
+  |- /src
+    |- index.js
++   |- globals.js
+  |- /node_modules
+```
+
+**src/globals.js**
+
+```js
+var file = 'blah.txt';
+var helpers = {
+  test: function() { console.log('test something'); },
+  parse: function() { console.log('parse something'); }
+}
+```
+
+你可能从来没有在自己的源码中做过这些事情，但是你也许遇到过一个老旧的库(library)，和上面所展示的代码类似。在这个用例中，我们可以使用 [`exports-loader`](https://www.webpackjs.com/loaders/exports-loader/)，将一个全局变量作为一个普通的模块来导出。例如，为了将 `file` 导出为 `file` 以及将 `helpers.parse` 导出为 `parse`，做如下调整：
+
+**webpack.config.js**
+
+```diff
+module.exports = {
+    module: {
+      rules: [
+        {
+          test: require.resolve('index.js'),
+          use: 'imports-loader?this=>window'
++       },
++       {
++         test: require.resolve('globals.js'),
++         use: 'exports-loader?file,parse=helpers.parse'
++       }
+      ]
+  
+```
+
+现在从我们的 entry 入口文件中(即 `src/index.js`)，我们能 `import { file, parse } from './globals.js';` ，然后一切将顺利进行。（`然而不会这么顺利`）
+
+```diff
+ (function() {
+|
+> import { file, parse } from './globals.js';
+|
+| function component() {
+```
+
+## 加载 polyfills
