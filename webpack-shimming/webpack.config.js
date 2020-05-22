@@ -3,10 +3,13 @@ var webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: {
+        index: './src/index.js'
+        , polyfills: './src/polyfills.js'
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: '[name].js',
+        filename: '[name].bundle.js',
     },
     plugins: [
         new webpack.ProvidePlugin({

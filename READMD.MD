@@ -223,4 +223,19 @@ module.exports = {
 | function component() {
 ```
 
-## 加载 polyfills
+## 别名配置
+```
+module.exports = {
+  //引用配置优化
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js']
+    alias: {
+      'vue$': 'vue/dist/vue.esm.js',
+      '@pages': path.join(__dirname, "..", "src", "pages"),
+      "@components": path.join(__dirname, "..", "src", "components"),
+      // 注意： 静态资源通过src，不能这么设置。
+      // "@assets": path.join(__dirname, "..", "src", "assets"),
+    }
+  },
+};
+```
