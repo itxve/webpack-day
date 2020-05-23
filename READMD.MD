@@ -224,7 +224,8 @@ module.exports = {
 ```
 
 ## 别名配置
-```
+
+```diff
 module.exports = {
   //引用配置优化
   resolve: {
@@ -239,3 +240,19 @@ module.exports = {
   },
 };
 ```
+
+## 参考
+
+- [指南](https://webpack.js.org/guides/)
+
+- [API](https://webpack.js.org/api/)
+
+- [插件](https://webpack.js.org/plugins/)
+
+- [概念（CONCEPTS）](https://webpack.js.org/concepts/)
+
+- [配置（CONFIGURATION）](https://webpack.js.org/configuration/)
+- [迁移（MIGRATE）](https://webpack.js.org/migrate/)
+
+- [资源处理器（LOADERS）](https://webpack.js.org/loaders/)
+
